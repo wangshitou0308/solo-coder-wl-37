@@ -17,7 +17,7 @@ export default function InspectionForm() {
   const { id } = useParams();
   const isEdit = !!id;
 
-  const { addInspection, fetchInspectionById, loading } = useInspectionStore();
+  const { addInspection, updateInspection, fetchInspectionById, loading } = useInspectionStore();
   const { bridges, fetchBridges } = useBridgeStore();
 
   const [formData, setFormData] = useState({
@@ -104,7 +104,7 @@ export default function InspectionForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
-    const result = await addInspection({
+    const data = {
       bridgeId: formData.bridgeId,
       type: formData.type as InspectionType,
       inspectionDate: formData.inspectionDate,
@@ -119,7 +119,13 @@ export default function InspectionForm() {
       drainage: formData.drainage,
       remarks: formData.remarks,
       photos: formData.photos,
-    });
+    };
+    let result;
+    if (isEdit && id) {
+      result = await updateInspection(id, data);
+    } else {
+      result = await addInspection(data);
+    }
     if (result) navigate('/inspections');
   };
 

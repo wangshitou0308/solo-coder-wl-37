@@ -12,6 +12,7 @@ interface InspectionState {
   }) => Promise<void>;
   fetchInspectionById: (id: string) => Promise<Inspection | null>;
   addInspection: (inspection: Omit<Inspection, 'id' | 'overallScore' | 'overallGrade'>) => Promise<Inspection | null>;
+  updateInspection: (id: string, inspection: Partial<Inspection>) => Promise<Inspection | null>;
 }
 
 export const useInspectionStore = create<InspectionState>((set) => ({
@@ -59,6 +60,26 @@ export const useInspectionStore = create<InspectionState>((set) => ({
       });
       const data = await res.json();
       set((state) => ({ inspections: [data, ...state.inspections], loading: false }));
+      return data;
+    } catch (error) {
+      set({ error: (error as Error).message, loading: false });
+      return null;
+    }
+  },
+
+  updateInspection: async (id, inspection) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await fetch(`/api/inspections/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(inspection),
+      });
+      const data = await res.json();
+      set((state) => ({
+        inspections: state.inspections.map((i) => (i.id === id ? data : i)),
+        loading: false,
+      }));
       return data;
     } catch (error) {
       set({ error: (error as Error).message, loading: false });

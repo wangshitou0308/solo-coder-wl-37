@@ -55,4 +55,32 @@ router.post('/', (req: Request, res: Response) => {
   res.status(201).json(newInspection);
 });
 
+router.put('/:id', (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { inspections } = loadAllData();
+  const data = req.body;
+  const index = inspections.findIndex(i => i.id === id);
+
+  if (index === -1) {
+    res.status(404).json({ error: '检测记录不存在' });
+    return;
+  }
+
+  const original = inspections[index];
+  const result = calculateOverallGrade(data);
+
+  const updatedInspection: Inspection = {
+    ...original,
+    ...data,
+    id: original.id,
+    overallScore: result.score,
+    overallGrade: result.grade,
+  };
+
+  const updated = [...inspections];
+  updated[index] = updatedInspection;
+  saveInspections(updated);
+  res.json(updatedInspection);
+});
+
 export default router;

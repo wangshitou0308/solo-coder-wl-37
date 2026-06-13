@@ -114,6 +114,31 @@ router.post('/', (req: Request, res: Response) => {
   res.status(201).json(newMaintenance);
 });
 
+router.put('/:id', (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { maintenances } = loadAllData();
+  const data = req.body;
+  const index = maintenances.findIndex(m => m.id === id);
+
+  if (index === -1) {
+    res.status(404).json({ error: '维修记录不存在' });
+    return;
+  }
+
+  const original = maintenances[index];
+  const updatedMaintenance: Maintenance = {
+    ...original,
+    ...data,
+    id: original.id,
+    isReviewed: original.isReviewed,
+  };
+
+  const updated = [...maintenances];
+  updated[index] = updatedMaintenance;
+  saveMaintenances(updated);
+  res.json(updatedMaintenance);
+});
+
 router.put('/:id/review', (req: Request, res: Response) => {
   const { id } = req.params;
   const { reviewResult } = req.body;

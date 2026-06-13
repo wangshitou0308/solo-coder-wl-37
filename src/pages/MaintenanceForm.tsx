@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useMaintenanceStore } from '@/stores/useMaintenanceStore';
 import { useBridgeStore } from '@/stores/useBridgeStore';
@@ -41,7 +41,9 @@ const initialFormData: FormData = {
 
 export default function MaintenanceForm() {
   const navigate = useNavigate();
-  const { addMaintenance, loading } = useMaintenanceStore();
+  const { id } = useParams();
+  const isEdit = !!id;
+  const { addMaintenance, updateMaintenance, fetchMaintenanceById, loading } = useMaintenanceStore();
   const { bridges, fetchBridges } = useBridgeStore();
   const { diseases, fetchDiseases } = useDiseaseStore();
 
@@ -50,13 +52,36 @@ export default function MaintenanceForm() {
 
   useEffect(() => {
     fetchBridges();
-  }, [fetchBridges]);
+    if (isEdit && id) {
+      loadMaintenance(id);
+    }
+  }, [fetchBridges, isEdit, id]);
 
   useEffect(() => {
     if (formData.bridgeId) {
       fetchDiseases({ bridgeId: formData.bridgeId });
     }
   }, [formData.bridgeId, fetchDiseases]);
+
+  const loadMaintenance = async (maintenanceId: string) => {
+    const data = await fetchMaintenanceById(maintenanceId);
+    if (data) {
+      setFormData({
+        bridgeId: data.bridgeId,
+        diseaseId: data.diseaseId || '',
+        type: data.type,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        contractor: data.contractor,
+        cost: data.cost,
+        description: data.description,
+        beforePhotos: data.beforePhotos || [],
+        afterPhotos: data.afterPhotos || [],
+        reviewDate: data.reviewDate || '',
+        reviewResult: data.reviewResult || '',
+      });
+    }
+  };
 
   const bridgeDiseases = diseases.filter(d => d.bridgeId === formData.bridgeId && d.status !== '已修复');
 
@@ -93,8 +118,13 @@ export default function MaintenanceForm() {
       diseaseId: formData.diseaseId || undefined,
     };
 
-    await addMaintenance(data);
-    navigate('/maintenances');
+    let result;
+    if (isEdit && id) {
+      result = await updateMaintenance(id, data);
+    } else {
+      result = await addMaintenance(data);
+    }
+    if (result) navigate('/maintenances');
   };
 
   const handleChange = (field: keyof FormData, value: string | number | string[]) => {
@@ -117,7 +147,7 @@ export default function MaintenanceForm() {
   }`;
 
   return (
-    <AppLayout title="新增维修记录">
+    <AppLayout title={isEdit ? '编辑维修记录' : '新增维修记录'}>
       <div className="space-y-6 max-w-6xl mx-auto">
         <button onClick={() => navigate('/maintenances')} className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900">
           <ArrowLeft className="w-4 h-4" />

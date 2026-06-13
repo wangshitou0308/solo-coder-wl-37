@@ -21,7 +21,8 @@ interface MaintenanceState {
   }) => Promise<void>;
   fetchStats: (filters?: { bridgeId?: string; year?: number }) => Promise<void>;
   fetchMaintenanceById: (id: string) => Promise<Maintenance | null>;
-  addMaintenance: (maintenance: Omit<Maintenance, 'id' | 'isReviewed'>) => Promise<void>;
+  addMaintenance: (maintenance: Omit<Maintenance, 'id' | 'isReviewed'>) => Promise<Maintenance | null>;
+  updateMaintenance: (id: string, maintenance: Partial<Maintenance>) => Promise<Maintenance | null>;
   updateReview: (id: string, result: string) => Promise<void>;
 }
 
@@ -72,8 +73,30 @@ export const useMaintenanceStore = create<MaintenanceState>((set) => ({
       });
       const data = await res.json();
       set((state) => ({ maintenances: [data, ...state.maintenances], loading: false }));
+      return data;
     } catch (error) {
       set({ error: (error as Error).message, loading: false });
+      return null;
+    }
+  },
+
+  updateMaintenance: async (id, maintenance) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await fetch(`/api/maintenances/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(maintenance),
+      });
+      const data = await res.json();
+      set((state) => ({
+        maintenances: state.maintenances.map((m) => (m.id === id ? data : m)),
+        loading: false,
+      }));
+      return data;
+    } catch (error) {
+      set({ error: (error as Error).message, loading: false });
+      return null;
     }
   },
 

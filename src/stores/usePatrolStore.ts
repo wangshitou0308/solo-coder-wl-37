@@ -9,7 +9,9 @@ interface PatrolState {
     bridgeId?: string;
     type?: PatrolType;
   }) => Promise<void>;
-  addPatrol: (patrol: Omit<Patrol, 'id' | 'hasGeneratedInspection'>) => Promise<void>;
+  fetchPatrolById: (id: string) => Promise<Patrol | null>;
+  addPatrol: (patrol: Omit<Patrol, 'id' | 'hasGeneratedInspection'>) => Promise<Patrol | null>;
+  updatePatrol: (id: string, patrol: Partial<Patrol>) => Promise<Patrol | null>;
   generateInspection: (id: string) => Promise<void>;
 }
 
@@ -33,6 +35,20 @@ export const usePatrolStore = create<PatrolState>((set) => ({
     }
   },
 
+  fetchPatrolById: async (id) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await fetch(`/api/patrols/${id}`);
+      if (!res.ok) throw new Error('巡查记录不存在');
+      const data = await res.json();
+      set({ loading: false });
+      return data;
+    } catch (error) {
+      set({ error: (error as Error).message, loading: false });
+      return null;
+    }
+  },
+
   addPatrol: async (patrol) => {
     set({ loading: true, error: null });
     try {
@@ -43,8 +59,30 @@ export const usePatrolStore = create<PatrolState>((set) => ({
       });
       const data = await res.json();
       set((state) => ({ patrols: [data, ...state.patrols], loading: false }));
+      return data;
     } catch (error) {
       set({ error: (error as Error).message, loading: false });
+      return null;
+    }
+  },
+
+  updatePatrol: async (id, patrol) => {
+    set({ loading: true, error: null });
+    try {
+      const res = await fetch(`/api/patrols/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(patrol),
+      });
+      const data = await res.json();
+      set((state) => ({
+        patrols: state.patrols.map((p) => (p.id === id ? data : p)),
+        loading: false,
+      }));
+      return data;
+    } catch (error) {
+      set({ error: (error as Error).message, loading: false });
+      return null;
     }
   },
 

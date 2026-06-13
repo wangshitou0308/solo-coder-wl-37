@@ -21,6 +21,19 @@ router.get('/', (req: Request, res: Response) => {
   res.json(filtered);
 });
 
+router.get('/:id', (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { patrols } = loadAllData();
+  const patrol = patrols.find(p => p.id === id);
+
+  if (!patrol) {
+    res.status(404).json({ error: '巡查记录不存在' });
+    return;
+  }
+
+  res.json(patrol);
+});
+
 router.post('/', (req: Request, res: Response) => {
   const { patrols } = loadAllData();
   const data = req.body;
@@ -34,6 +47,32 @@ router.post('/', (req: Request, res: Response) => {
   const updated = [newPatrol, ...patrols];
   savePatrols(updated);
   res.status(201).json(newPatrol);
+});
+
+router.put('/:id', (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { patrols } = loadAllData();
+  const data = req.body;
+  const index = patrols.findIndex(p => p.id === id);
+
+  if (index === -1) {
+    res.status(404).json({ error: '巡查记录不存在' });
+    return;
+  }
+
+  const original = patrols[index];
+  const updatedPatrol: Patrol = {
+    ...original,
+    ...data,
+    id: original.id,
+    hasGeneratedInspection: original.hasGeneratedInspection,
+    generatedInspectionId: original.generatedInspectionId,
+  };
+
+  const updated = [...patrols];
+  updated[index] = updatedPatrol;
+  savePatrols(updated);
+  res.json(updatedPatrol);
 });
 
 router.post('/:id/generate-inspection', (req: Request, res: Response) => {

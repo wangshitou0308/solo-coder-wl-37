@@ -26,7 +26,7 @@ export default function PatrolForm() {
   const { id } = useParams();
   const isEdit = !!id;
 
-  const { addPatrol, loading } = usePatrolStore();
+  const { addPatrol, updatePatrol, fetchPatrolById, loading } = usePatrolStore();
   const { bridges, fetchBridges } = useBridgeStore();
 
   const [formData, setFormData] = useState({
@@ -44,7 +44,26 @@ export default function PatrolForm() {
 
   useEffect(() => {
     fetchBridges();
-  }, [fetchBridges]);
+    if (isEdit && id) {
+      loadPatrol(id);
+    }
+  }, [fetchBridges, isEdit, id]);
+
+  const loadPatrol = async (patrolId: string) => {
+    const data = await fetchPatrolById(patrolId);
+    if (data) {
+      setFormData({
+        bridgeId: data.bridgeId,
+        type: data.type,
+        eventType: data.eventType || '',
+        date: data.date,
+        recorder: data.recorder,
+        description: data.description,
+        emergencyMeasures: data.emergencyMeasures || '',
+        photos: data.photos || [],
+      });
+    }
+  };
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
@@ -79,8 +98,13 @@ export default function PatrolForm() {
       }
     }
 
-    await addPatrol(data);
-    navigate('/patrols');
+    let result;
+    if (isEdit && id) {
+      result = await updatePatrol(id, data);
+    } else {
+      result = await addPatrol(data);
+    }
+    if (result) navigate('/patrols');
   };
 
   const handleChange = (field: string, value: string | string[]) => {

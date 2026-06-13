@@ -14,6 +14,7 @@ import MaintenanceList from "@/pages/MaintenanceList";
 import MaintenanceForm from "@/pages/MaintenanceForm";
 import MaintenanceDetail from "@/pages/MaintenanceDetail";
 import PatrolList from "@/pages/PatrolList";
+import PatrolDetail from "@/pages/PatrolDetail";
 import PatrolForm from "@/pages/PatrolForm";
 
 export default function App() {
@@ -46,7 +47,8 @@ export default function App() {
         
         <Route path="/patrols" element={<PatrolList />} />
         <Route path="/patrols/new" element={<PatrolForm />} />
-        <Route path="/patrols/:id" element={<PatrolForm />} />
+        <Route path="/patrols/:id" element={<PatrolDetail />} />
+        <Route path="/patrols/:id/edit" element={<PatrolForm />} />
       </Routes>
     </Router>
   );
