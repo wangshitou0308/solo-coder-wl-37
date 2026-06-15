@@ -17,6 +17,8 @@ import diseaseRoutes from './routes/diseases'
 import maintenanceRoutes from './routes/maintenances'
 import patrolRoutes from './routes/patrols'
 import dashboardRoutes from './routes/dashboard'
+import inspectionPlanRoutes from './routes/inspectionPlans'
+import disposalTaskRoutes from './routes/disposalTasks'
 import { loadAllData } from './data'
 
 // for esm mode
@@ -43,6 +45,8 @@ app.use('/api/diseases', diseaseRoutes)
 app.use('/api/maintenances', maintenanceRoutes)
 app.use('/api/patrols', patrolRoutes)
 app.use('/api/dashboard', dashboardRoutes)
+app.use('/api/inspection-plans', inspectionPlanRoutes)
+app.use('/api/disposal-tasks', disposalTaskRoutes)
 
 /**
  * health

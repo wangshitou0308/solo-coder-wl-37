@@ -13,6 +13,10 @@ import {
   DiseaseType,
   MaintenanceType,
   EventType,
+  InspectionPlan,
+  InspectionPlanStatus,
+  DisposalTask,
+  DisposalTaskStatus,
 } from '../../src/types';
 import { calculateOverallGrade } from '../../src/utils/gradeCalculator';
 import { formatDate, addDays, getCurrentYear } from '../../src/utils/dateUtils';
@@ -275,12 +279,111 @@ function generatePatrols(bridges: Bridge[], count: number): Patrol[] {
   return patrols.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 
+function generateInspectionPlans(bridges: Bridge[], inspections: Inspection[]): InspectionPlan[] {
+  const plans: InspectionPlan[] = [];
+  const types: InspectionType[] = ['常规定期', '结构定期', '特殊检测'];
+
+  bridges.forEach((bridge) => {
+    const planCount = randomInt(1, 3);
+    for (let i = 0; i < planCount; i++) {
+      const type = randomChoice(types);
+      const daysFromNow = randomInt(-60, 90);
+      const planDate = addDays(new Date(), daysFromNow);
+      const isPast = daysFromNow < 0;
+      const isOverdue = isPast && Math.random() < 0.3;
+
+      let status: InspectionPlanStatus;
+      let inspectionId: string | undefined;
+
+      if (isOverdue) {
+        status = '已逾期';
+      } else if (isPast) {
+        status = '已完成';
+        const bridgeInspections = inspections.filter((ins) => ins.bridgeId === bridge.id && ins.type === type);
+        if (bridgeInspections.length > 0) {
+          inspectionId = bridgeInspections[0]?.id;
+        }
+      } else if (Math.random() < 0.4) {
+        status = '执行中';
+      } else {
+        status = '待执行';
+      }
+
+      plans.push({
+        id: generateId(),
+        bridgeId: bridge.id,
+        type,
+        planDate,
+        inspector: status !== '待执行' ? randomChoice(INSPECTORS) : undefined,
+        status,
+        description: `${bridge.name}${type}检测计划`,
+        inspectionId,
+        createdAt: addDays(planDate, -randomInt(7, 30)),
+        updatedAt: formatDate(new Date()),
+      });
+    }
+  });
+
+  return plans.sort((a, b) => new Date(b.planDate).getTime() - new Date(a.planDate).getTime());
+}
+
+function generateDisposalTasks(diseases: Disease[]): DisposalTask[] {
+  const tasks: DisposalTask[] = [];
+  const statuses: DisposalTaskStatus[] = ['待分派', '处理中', '待验收', '已完成'];
+  const responsibleUnits = ['市政工程养护中心', '桥梁维修所', '交通设施维护队', '第三方检测公司'];
+  const responsiblePersons = ['李工', '王工', '张工', '刘工', '陈工'];
+
+  diseases.forEach((disease) => {
+    if (disease.status === '已记录' && Math.random() < 0.5) return;
+
+    const daysFromRecorded = randomInt(1, 30);
+    const createdAt = addDays(new Date(disease.recordedDate), daysFromRecorded);
+    const planDays = randomInt(15, 90);
+    const planFinishDate = addDays(createdAt, planDays);
+
+    let status: DisposalTaskStatus;
+    let progress: number;
+    let maintenanceId: string | undefined;
+
+    if (disease.status === '已修复') {
+      status = '已完成';
+      progress = 100;
+    } else if (disease.status === '处理中') {
+      const statusIdx = randomInt(1, 2);
+      status = statuses[statusIdx];
+      progress = status === '处理中' ? randomInt(20, 80) : randomInt(90, 99);
+    } else {
+      status = '待分派';
+      progress = 0;
+    }
+
+    tasks.push({
+      id: generateId(),
+      diseaseId: disease.id,
+      bridgeId: disease.bridgeId,
+      responsibleUnit: status !== '待分派' ? randomChoice(responsibleUnits) : '',
+      responsiblePerson: status !== '待分派' ? randomChoice(responsiblePersons) : '',
+      planFinishDate,
+      disposalMeasures: `针对${disease.type}病害进行${status === '已完成' ? '修复' : '计划修复'}处理`,
+      progress,
+      status,
+      maintenanceId: status === '已完成' && Math.random() < 0.6 ? generateId() : undefined,
+      createdAt,
+      updatedAt: formatDate(new Date()),
+    });
+  });
+
+  return tasks.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+}
+
 export function generateMockData() {
   const bridges = generateBridges(30);
   const inspections = generateInspections(bridges, 80);
   const diseases = generateDiseases(bridges, inspections, 60);
   const maintenances = generateMaintenances(bridges, diseases, 40);
   const patrols = generatePatrols(bridges, 50);
+  const inspectionPlans = generateInspectionPlans(bridges, inspections);
+  const disposalTasks = generateDisposalTasks(diseases);
 
-  return { bridges, inspections, diseases, maintenances, patrols };
+  return { bridges, inspections, diseases, maintenances, patrols, inspectionPlans, disposalTasks };
 }

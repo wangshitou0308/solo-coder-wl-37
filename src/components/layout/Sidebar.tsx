@@ -4,17 +4,21 @@ import {
   LayoutDashboard,
   Building2,
   ClipboardCheck,
+  CalendarDays,
   AlertTriangle,
   Wrench,
   Footprints,
   Map,
+  ClipboardList,
 } from 'lucide-react';
 
 const menuItems = [
   { path: '/dashboard', label: '数据看板', icon: LayoutDashboard },
   { path: '/bridges', label: '桥梁档案', icon: Building2 },
+  { path: '/inspection-plans', label: '检测计划', icon: CalendarDays },
   { path: '/inspections', label: '定期检测', icon: ClipboardCheck },
   { path: '/diseases', label: '病害追踪', icon: AlertTriangle },
+  { path: '/disposal-tasks', label: '病害处置', icon: ClipboardList },
   { path: '/maintenances', label: '维修加固', icon: Wrench },
   { path: '/patrols', label: '养护巡查', icon: Footprints },
   { path: '/map', label: '地图可视化', icon: Map },

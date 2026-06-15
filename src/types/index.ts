@@ -8,6 +8,8 @@ export type DiseaseStatus = '已记录' | '处理中' | '已修复';
 export type MaintenanceType = '日常养护' | '小修' | '中修' | '大修' | '加固' | '重建';
 export type PatrolType = '日常巡查' | '突发事件';
 export type EventType = '车辆撞击' | '洪水冲刷' | '超重车通行' | '地震' | '其他';
+export type InspectionPlanStatus = '待执行' | '执行中' | '已完成' | '已逾期';
+export type DisposalTaskStatus = '待分派' | '处理中' | '待验收' | '已完成';
 
 export interface Bridge {
   id: string;
@@ -120,6 +122,12 @@ export interface DashboardStats {
   annualCostTrend: { year: number; cost: number }[];
   inspectionCompletionRate: { type: string; completed: number; total: number }[];
   highRiskBridges: Bridge[];
+  monthlyPendingPlans: number;
+  overduePlans: number;
+  planCompletionRate: number;
+  pendingSevereDiseases: number;
+  upcomingOverdueTasks: number;
+  disposalCompletionRate: number;
 }
 
 export interface RatingItem {
@@ -183,3 +191,54 @@ export const STATUS_COLORS: Record<DiseaseStatus, string> = {
   '处理中': '#f59e0b',
   '已修复': '#10b981',
 };
+
+export interface InspectionPlan {
+  id: string;
+  bridgeId: string;
+  type: InspectionType;
+  planDate: string;
+  inspector?: string;
+  status: InspectionPlanStatus;
+  description: string;
+  inspectionId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DisposalTask {
+  id: string;
+  diseaseId: string;
+  bridgeId: string;
+  responsibleUnit: string;
+  responsiblePerson: string;
+  planFinishDate: string;
+  disposalMeasures: string;
+  progress: number;
+  status: DisposalTaskStatus;
+  maintenanceId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const INSPECTION_PLAN_STATUS_COLORS: Record<InspectionPlanStatus, string> = {
+  '待执行': '#3b82f6',
+  '执行中': '#f59e0b',
+  '已完成': '#10b981',
+  '已逾期': '#ef4444',
+};
+
+export const DISPOSAL_TASK_STATUS_COLORS: Record<DisposalTaskStatus, string> = {
+  '待分派': '#6b7280',
+  '处理中': '#f59e0b',
+  '待验收': '#8b5cf6',
+  '已完成': '#10b981',
+};
+
+export interface LifecycleEvent {
+  id: string;
+  type: 'inspection' | 'disease' | 'maintenance' | 'patrol' | 'event';
+  date: string;
+  title: string;
+  description: string;
+  status?: string;
+}

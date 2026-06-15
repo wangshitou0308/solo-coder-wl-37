@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { Bridge, Inspection, Disease, Maintenance, Patrol } from '../../src/types';
+import { Bridge, Inspection, Disease, Maintenance, Patrol, InspectionPlan, DisposalTask } from '../../src/types';
 import { generateMockData } from './mockDataGenerator';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -14,6 +14,8 @@ const DATA_FILES = {
   diseases: path.join(DATA_DIR, 'diseases.json'),
   maintenances: path.join(DATA_DIR, 'maintenances.json'),
   patrols: path.join(DATA_DIR, 'patrols.json'),
+  inspectionPlans: path.join(DATA_DIR, 'inspectionPlans.json'),
+  disposalTasks: path.join(DATA_DIR, 'disposalTasks.json'),
 };
 
 let cache: {
@@ -22,6 +24,8 @@ let cache: {
   diseases: Disease[];
   maintenances: Maintenance[];
   patrols: Patrol[];
+  inspectionPlans: InspectionPlan[];
+  disposalTasks: DisposalTask[];
 } | null = null;
 
 function initData() {
@@ -55,6 +59,8 @@ export function loadAllData() {
     diseases: readData<Disease>(DATA_FILES.diseases),
     maintenances: readData<Maintenance>(DATA_FILES.maintenances),
     patrols: readData<Patrol>(DATA_FILES.patrols),
+    inspectionPlans: readData<InspectionPlan>(DATA_FILES.inspectionPlans),
+    disposalTasks: readData<DisposalTask>(DATA_FILES.disposalTasks),
   };
   return cache;
 }
@@ -79,6 +85,14 @@ export function savePatrols(data: Patrol[]) {
   writeData(DATA_FILES.patrols, data);
 }
 
+export function saveInspectionPlans(data: InspectionPlan[]) {
+  writeData(DATA_FILES.inspectionPlans, data);
+}
+
+export function saveDisposalTasks(data: DisposalTask[]) {
+  writeData(DATA_FILES.disposalTasks, data);
+}
+
 export function regenerateMockData() {
   const data = generateMockData();
   saveBridges(data.bridges);
@@ -86,5 +100,7 @@ export function regenerateMockData() {
   saveDiseases(data.diseases);
   saveMaintenances(data.maintenances);
   savePatrols(data.patrols);
+  saveInspectionPlans(data.inspectionPlans);
+  saveDisposalTasks(data.disposalTasks);
   return data;
 }

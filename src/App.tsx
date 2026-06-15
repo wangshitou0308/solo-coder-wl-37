@@ -16,6 +16,10 @@ import MaintenanceDetail from "@/pages/MaintenanceDetail";
 import PatrolList from "@/pages/PatrolList";
 import PatrolDetail from "@/pages/PatrolDetail";
 import PatrolForm from "@/pages/PatrolForm";
+import InspectionPlanList from "@/pages/InspectionPlanList";
+import InspectionPlanForm from "@/pages/InspectionPlanForm";
+import DisposalTaskList from "@/pages/DisposalTaskList";
+import DisposalTaskForm from "@/pages/DisposalTaskForm";
 
 export default function App() {
   return (
@@ -34,11 +38,19 @@ export default function App() {
         <Route path="/inspections/new" element={<InspectionForm />} />
         <Route path="/inspections/:id" element={<InspectionDetail />} />
         <Route path="/inspections/:id/edit" element={<InspectionForm />} />
-        
+
+        <Route path="/inspection-plans" element={<InspectionPlanList />} />
+        <Route path="/inspection-plans/new" element={<InspectionPlanForm />} />
+        <Route path="/inspection-plans/:id/edit" element={<InspectionPlanForm />} />
+
         <Route path="/diseases" element={<DiseaseList />} />
         <Route path="/diseases/new" element={<DiseaseForm />} />
         <Route path="/diseases/:id" element={<DiseaseDetail />} />
         <Route path="/diseases/:id/edit" element={<DiseaseForm />} />
+
+        <Route path="/disposal-tasks" element={<DisposalTaskList />} />
+        <Route path="/disposal-tasks/new" element={<DisposalTaskForm />} />
+        <Route path="/disposal-tasks/:id/edit" element={<DisposalTaskForm />} />
         
         <Route path="/maintenances" element={<MaintenanceList />} />
         <Route path="/maintenances/new" element={<MaintenanceForm />} />

@@ -32,6 +32,12 @@ import {
   Activity,
   ShieldAlert,
   RefreshCw,
+  CalendarClock,
+  FileX,
+  Target,
+  AlertOctagon,
+  Hourglass,
+  CheckSquare,
 } from 'lucide-react';
 import { Grade, GRADE_COLORS, GRADE_LABELS } from '@/types';
 
@@ -110,6 +116,66 @@ export default function Home() {
         trend: '本年度累计',
         trendIcon: Activity,
         trendColor: 'text-emerald-600',
+      },
+    ];
+  }, [stats]);
+
+  const inspectionPlanCards = useMemo(() => {
+    if (!stats) return [];
+    return [
+      {
+        label: '本月待检计划',
+        value: stats.monthlyPendingPlans,
+        icon: CalendarClock,
+        color: 'from-blue-500 to-cyan-600',
+        textColor: 'text-blue-600',
+        bgColor: 'bg-blue-50',
+      },
+      {
+        label: '逾期检测计划',
+        value: stats.overduePlans,
+        icon: FileX,
+        color: 'from-rose-500 to-red-600',
+        textColor: 'text-rose-600',
+        bgColor: 'bg-rose-50',
+      },
+      {
+        label: '计划完成率',
+        value: `${stats.planCompletionRate}%`,
+        icon: Target,
+        color: 'from-emerald-500 to-green-600',
+        textColor: 'text-emerald-600',
+        bgColor: 'bg-emerald-50',
+      },
+    ];
+  }, [stats]);
+
+  const disposalCards = useMemo(() => {
+    if (!stats) return [];
+    return [
+      {
+        label: '待处置严重病害',
+        value: stats.pendingSevereDiseases,
+        icon: AlertOctagon,
+        color: 'from-orange-500 to-amber-600',
+        textColor: 'text-orange-600',
+        bgColor: 'bg-orange-50',
+      },
+      {
+        label: '即将超期任务',
+        value: stats.upcomingOverdueTasks,
+        icon: Hourglass,
+        color: 'from-amber-500 to-yellow-600',
+        textColor: 'text-amber-600',
+        bgColor: 'bg-amber-50',
+      },
+      {
+        label: '处置完成率',
+        value: `${stats.disposalCompletionRate}%`,
+        icon: CheckSquare,
+        color: 'from-teal-500 to-emerald-600',
+        textColor: 'text-teal-600',
+        bgColor: 'bg-teal-50',
       },
     ];
   }, [stats]);
@@ -265,6 +331,60 @@ export default function Home() {
               </div>
             </div>
           ))}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base font-semibold text-slate-800 flex items-center gap-2">
+                <ClipboardCheck size={18} className="text-blue-600" />
+                检测计划统计
+              </h3>
+              <button
+                onClick={() => navigate('/inspection-plans')}
+                className="text-xs text-cyan-600 hover:text-cyan-800 flex items-center gap-1"
+              >
+                查看全部 <ChevronRight size={14} />
+              </button>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              {inspectionPlanCards.map((card, idx) => (
+                <div key={idx} className="text-center p-4 rounded-lg bg-gray-50/50">
+                  <div className={`inline-flex p-2.5 rounded-xl ${card.bgColor} mb-2`}>
+                    <card.icon size={20} className={card.textColor} />
+                  </div>
+                  <p className="text-2xl font-bold text-slate-800">{card.value}</p>
+                  <p className="text-xs text-gray-500 mt-1">{card.label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base font-semibold text-slate-800 flex items-center gap-2">
+                <AlertTriangle size={18} className="text-amber-600" />
+                病害处置统计
+              </h3>
+              <button
+                onClick={() => navigate('/disposal-tasks')}
+                className="text-xs text-cyan-600 hover:text-cyan-800 flex items-center gap-1"
+              >
+                查看全部 <ChevronRight size={14} />
+              </button>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              {disposalCards.map((card, idx) => (
+                <div key={idx} className="text-center p-4 rounded-lg bg-gray-50/50">
+                  <div className={`inline-flex p-2.5 rounded-xl ${card.bgColor} mb-2`}>
+                    <card.icon size={20} className={card.textColor} />
+                  </div>
+                  <p className="text-2xl font-bold text-slate-800">{card.value}</p>
+                  <p className="text-xs text-gray-500 mt-1">{card.label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
